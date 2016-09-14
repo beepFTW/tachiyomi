@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.catalogue
+package eu.kanade.tachiyomi.ui.latest_updates
 
 import android.view.Gravity
 import android.view.ViewGroup
@@ -17,7 +17,7 @@ import java.util.*
  *
  * @param fragment the fragment containing this adapter.
  */
-class CatalogueAdapter(val fragment: CatalogueFragment) : FlexibleAdapter<CatalogueHolder, Manga>() {
+class LatestUpdatesAdapter(val fragment: LatestUpdatesFragment) : FlexibleAdapter<LatestUpdatesHolder, Manga>() {
 
     /**
      * Property to get the list of manga in the adapter.
@@ -74,16 +74,16 @@ class CatalogueAdapter(val fragment: CatalogueFragment) : FlexibleAdapter<Catalo
      * @param viewType the type of the holder.
      * @return a new view holder for a manga.
      */
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CatalogueHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LatestUpdatesHolder {
         if (parent.id == R.id.catalogue_grid) {
             val view = parent.inflate(R.layout.item_catalogue_grid).apply {
                 card.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, coverHeight)
                 gradient.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, coverHeight / 2, Gravity.BOTTOM)
             }
-            return CatalogueGridLatestHolder(view, this, fragment)
+            return LatestUpdatesGridHolder(view, this, fragment)
         } else {
             val view = parent.inflate(R.layout.item_catalogue_list)
-            return CatalogueListLatestHolder(view, this, fragment)
+            return LatestUpdatesGridHolder(view, this, fragment)
         }
     }
 
@@ -93,7 +93,7 @@ class CatalogueAdapter(val fragment: CatalogueFragment) : FlexibleAdapter<Catalo
      * @param holder the holder to bind.
      * @param position the position to bind.
      */
-    override fun onBindViewHolder(holder: CatalogueHolder, position: Int) {
+    override fun onBindViewHolder(holder: LatestUpdatesHolder, position: Int) {
         val manga = getItem(position)
         holder.onSetValues(manga)
     }

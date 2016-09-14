@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.catalogue
+package eu.kanade.tachiyomi.ui.latest_updates
 
 import android.content.res.Configuration
 import android.os.Bundle
@@ -39,8 +39,8 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  * Fragment that shows the manga from the catalogue.
  * Uses R.layout.fragment_catalogue.
  */
-@RequiresPresenter(CataloguePresenter::class)
-class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHolder.OnListItemClickListener {
+@RequiresPresenter(LatestUpdatesPresenter::class)
+class LatestUpdatesFragment : BaseRxFragment<LatestUpdatesPresenter>(), FlexibleViewHolder.OnListItemClickListener {
 
     /**
      * Spinner shown in the toolbar to change the selected source.
@@ -50,7 +50,7 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
     /**
      * Adapter containing the list of manga from the catalogue.
      */
-    private lateinit var adapter: CatalogueAdapter
+    private lateinit var updatesAdapter: LatestUpdatesAdapter
 
     /**
      * Scroll listener for grid mode. It loads next pages when the end of the list is reached.
@@ -108,10 +108,10 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
         /**
          * Creates a new instance of this fragment.
          *
-         * @return a new instance of [CatalogueFragment].
+         * @return a new instance of [LatestUpdatesFragment].
          */
-        fun newInstance(): CatalogueFragment {
-            return CatalogueFragment()
+        fun newInstance(): LatestUpdatesFragment {
+            return LatestUpdatesFragment()
         }
     }
 
@@ -125,19 +125,19 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
     }
 
     override fun onViewCreated(view: View, savedState: Bundle?) {
-        // Initialize adapter, scroll listener and recycler views
-        adapter = CatalogueAdapter(this)
+        // Initialize updatesAdapter, scroll listener and recycler views
+        updatesAdapter = LatestUpdatesAdapter(this)
 
         val glm = catalogue_grid.layoutManager as GridLayoutManager
         gridScrollListener = EndlessScrollListener(glm, { requestNextPage() })
         catalogue_grid.setHasFixedSize(true)
-        catalogue_grid.adapter = adapter
+        catalogue_grid.adapter = updatesAdapter
         catalogue_grid.addOnScrollListener(gridScrollListener)
 
         val llm = LinearLayoutManager(activity)
         listScrollListener = EndlessScrollListener(llm, { requestNextPage() })
         catalogue_list.setHasFixedSize(true)
-        catalogue_list.adapter = adapter
+        catalogue_list.adapter = updatesAdapter
         catalogue_list.layoutManager = llm
         catalogue_list.addOnScrollListener(listScrollListener)
         catalogue_list.addItemDecoration(
@@ -150,8 +150,8 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
         numColumnsSubscription = getColumnsPreferenceForCurrentOrientation().asObservable()
                 .doOnNext { catalogue_grid.spanCount = it }
                 .skip(1)
-                // Set again the adapter to recalculate the covers height
-                .subscribe { catalogue_grid.adapter = adapter }
+                // Set again the updatesAdapter to recalculate the covers height
+                .subscribe { catalogue_grid.adapter = updatesAdapter }
 
         switcher.inAnimation = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
         switcher.outAnimation = AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
@@ -165,9 +165,10 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
 
         val onItemSelected = IgnoreFirstSpinnerListener { position ->
             val source = spinnerAdapter.getItem(position)
-            if (!presenter.isValidSource(source)) {
+            if (presenter.isValidSource(source) != 2) {
                 spinner.setSelection(selectedIndex)
-                context.toast(R.string.source_requires_login)
+                if (presenter.isValidSource(source) == 1) context.toast(R.string.source_requires_login)
+                else context.toast(R.string.source_unsupported_operation)
             } else if (source != presenter.source) {
                 selectedIndex = position
                 showProgressBar()
@@ -193,7 +194,9 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.catalogue_list, menu)
+            inflater.inflate(R.menu.catalogue_list, menu)
+
+
 
         // Initialize search menu
         searchItem = menu.findItem(R.id.action_search).apply {
@@ -214,19 +217,22 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
                     onSearchEvent(newText, false)
                     return true
                 }
+
+
             })
         }
 
         // Setup filters button
         menu.findItem(R.id.action_set_filter).apply {
             if (presenter.source.filters.isEmpty()) {
-                isEnabled = false
+                isEnabled = false //Default is false
                 icon.alpha = 128
             } else {
-                isEnabled = true
+                isEnabled = true //Default is true
                 icon.alpha = 255
             }
         }
+
 
         // Show next display mode
         menu.findItem(R.id.action_display_mode).apply {
@@ -318,11 +324,11 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
     fun onAddPage(page: Int, mangas: List<Manga>) {
         hideProgressBar()
         if (page == 1) {
-            adapter.clear()
+            updatesAdapter.clear()
             gridScrollListener.resetScroll()
             listScrollListener.resetScroll()
         }
-        adapter.addItems(mangas)
+        updatesAdapter.addItems(mangas)
     }
 
     /**
@@ -361,7 +367,7 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
         switcher.showNext()
         if (!isListMode) {
             // Initialize mangas if going to grid view
-            presenter.initializeMangas(adapter.items)
+            presenter.initializeMangas(updatesAdapter.items)
         }
     }
 
@@ -383,8 +389,8 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
      * @param manga the manga to find.
      * @return the holder of the manga or null if it's not bound.
      */
-    private fun getHolder(manga: Manga): CatalogueGridLatestHolder? {
-        return catalogue_grid.findViewHolderForItemId(manga.id!!) as? CatalogueGridLatestHolder
+    private fun getHolder(manga: Manga): LatestUpdatesGridHolder? {
+        return catalogue_grid.findViewHolderForItemId(manga.id!!) as? LatestUpdatesGridHolder
     }
 
     /**
@@ -416,7 +422,7 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
      * @return true if the item should be selected, false otherwise.
      */
     override fun onListItemClick(position: Int): Boolean {
-        val item = adapter.getItem(position) ?: return false
+        val item = updatesAdapter.getItem(position) ?: return false
 
         val intent = MangaActivity.newIntent(activity, item, true)
         startActivity(intent)
@@ -429,7 +435,7 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
      * @param position the position of the element clicked.
      */
     override fun onListItemLongClick(position: Int) {
-        val manga = adapter.getItem(position) ?: return
+        val manga = updatesAdapter.getItem(position) ?: return
 
         val textRes = if (manga.favorite) R.string.remove_from_library else R.string.add_to_library
 
@@ -439,7 +445,7 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
                     when (which) {
                         0 -> {
                             presenter.changeMangaFavorite(manga)
-                            adapter.notifyItemChanged(position)
+                            updatesAdapter.notifyItemChanged(position)
                         }
                     }
                 }.show()
@@ -467,5 +473,6 @@ class CatalogueFragment : BaseRxFragment<CataloguePresenter>(), FlexibleViewHold
                 .negativeText(android.R.string.cancel)
                 .show()
     }
+
 
 }
