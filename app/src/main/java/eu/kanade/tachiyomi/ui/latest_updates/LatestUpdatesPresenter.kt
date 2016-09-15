@@ -316,7 +316,7 @@ class LatestUpdatesPresenter : BasePresenter<LatestUpdatesFragment>() {
         if (source is LoginSource) {
             if (source.isLogged() ||
                     (prefs.sourceUsername(source) != "" && prefs.sourcePassword(source) != ""))
-            return 1
+            return 2
         }
         return 2
     }

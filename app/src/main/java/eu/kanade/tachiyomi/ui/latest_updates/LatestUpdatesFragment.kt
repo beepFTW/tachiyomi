@@ -26,7 +26,7 @@ import eu.kanade.tachiyomi.util.toast
 import eu.kanade.tachiyomi.widget.DividerItemDecoration
 import eu.kanade.tachiyomi.widget.EndlessScrollListener
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
-import kotlinx.android.synthetic.main.fragment_catalogue.*
+import kotlinx.android.synthetic.main.fragment_latest_updates.*
 import kotlinx.android.synthetic.main.toolbar.*
 import nucleus.factory.RequiresPresenter
 import rx.Subscription
@@ -121,26 +121,27 @@ class LatestUpdatesFragment : BaseRxFragment<LatestUpdatesPresenter>(), Flexible
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_catalogue, container, false)
+        return inflater.inflate(R.layout.fragment_latest_updates, container, false)
     }
 
     override fun onViewCreated(view: View, savedState: Bundle?) {
         // Initialize updatesAdapter, scroll listener and recycler views
-        updatesAdapter = LatestUpdatesAdapter(this)
+        updatesAdapter = LatestUpdatesAdapter(this) //updatesAdapter null? causes WAIT
 
-        val glm = catalogue_grid.layoutManager as GridLayoutManager
+
+        val glm = latest_updates_grid.layoutManager as GridLayoutManager
         gridScrollListener = EndlessScrollListener(glm, { requestNextPage() })
-        catalogue_grid.setHasFixedSize(true)
-        catalogue_grid.adapter = updatesAdapter
-        catalogue_grid.addOnScrollListener(gridScrollListener)
+        latest_updates_grid.setHasFixedSize(true)
+        latest_updates_grid.adapter = updatesAdapter
+        latest_updates_grid.addOnScrollListener(gridScrollListener)
 
         val llm = LinearLayoutManager(activity)
         listScrollListener = EndlessScrollListener(llm, { requestNextPage() })
-        catalogue_list.setHasFixedSize(true)
-        catalogue_list.adapter = updatesAdapter
-        catalogue_list.layoutManager = llm
-        catalogue_list.addOnScrollListener(listScrollListener)
-        catalogue_list.addItemDecoration(
+        latest_updates_list.setHasFixedSize(true)
+        latest_updates_list.adapter = updatesAdapter
+        latest_updates_list.layoutManager = llm
+        latest_updates_list.addOnScrollListener(listScrollListener)
+        latest_updates_list.addItemDecoration(
                 DividerItemDecoration(context.theme.getResourceDrawable(R.attr.divider_drawable)))
 
         if (presenter.isListMode) {
@@ -148,10 +149,10 @@ class LatestUpdatesFragment : BaseRxFragment<LatestUpdatesPresenter>(), Flexible
         }
 
         numColumnsSubscription = getColumnsPreferenceForCurrentOrientation().asObservable()
-                .doOnNext { catalogue_grid.spanCount = it }
+                .doOnNext { latest_updates_grid.spanCount = it }
                 .skip(1)
                 // Set again the updatesAdapter to recalculate the covers height
-                .subscribe { catalogue_grid.adapter = updatesAdapter }
+                .subscribe { latest_updates_grid.adapter = updatesAdapter }
 
         switcher.inAnimation = AnimationUtils.loadAnimation(activity, android.R.anim.fade_in)
         switcher.outAnimation = AnimationUtils.loadAnimation(activity, android.R.anim.fade_out)
@@ -167,7 +168,7 @@ class LatestUpdatesFragment : BaseRxFragment<LatestUpdatesPresenter>(), Flexible
             val source = spinnerAdapter.getItem(position)
             if (presenter.isValidSource(source) != 2) {
                 spinner.setSelection(selectedIndex)
-                if (presenter.isValidSource(source) == 1) context.toast(R.string.source_requires_login)
+                if (presenter.isValidSource(source) == 2) context.toast(R.string.source_requires_login)
                 else context.toast(R.string.source_unsupported_operation)
             } else if (source != presenter.source) {
                 selectedIndex = position
@@ -194,9 +195,10 @@ class LatestUpdatesFragment : BaseRxFragment<LatestUpdatesPresenter>(), Flexible
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-            inflater.inflate(R.menu.catalogue_list, menu)
-
-
+        inflater.inflate(R.menu.latest_updates_list, menu)
+        menu.findItem(R.id.action_search).isVisible = false
+        menu.findItem(R.id.action_set_filter).isVisible = false
+        menu.findItem(R.id.action_display_mode).isVisible = true
 
         // Initialize search menu
         searchItem = menu.findItem(R.id.action_search).apply {
@@ -299,8 +301,8 @@ class LatestUpdatesFragment : BaseRxFragment<LatestUpdatesPresenter>(), Flexible
             return
 
         showProgressBar()
-        catalogue_grid.layoutManager.scrollToPosition(0)
-        catalogue_list.layoutManager.scrollToPosition(0)
+        latest_updates_grid.layoutManager.scrollToPosition(0)
+        latest_updates_list.layoutManager.scrollToPosition(0)
 
         presenter.restartPager(newQuery)
     }
@@ -340,7 +342,7 @@ class LatestUpdatesFragment : BaseRxFragment<LatestUpdatesPresenter>(), Flexible
         hideProgressBar()
         Timber.e(error)
 
-        catalogue_view.snack(error.message ?: "", Snackbar.LENGTH_INDEFINITE) {
+        latest_updates_view.snack(error.message ?: "", Snackbar.LENGTH_INDEFINITE) {
             setAction(R.string.action_retry) {
                 showProgressBar()
                 presenter.requestNext()
@@ -390,7 +392,7 @@ class LatestUpdatesFragment : BaseRxFragment<LatestUpdatesPresenter>(), Flexible
      * @return the holder of the manga or null if it's not bound.
      */
     private fun getHolder(manga: Manga): LatestUpdatesGridHolder? {
-        return catalogue_grid.findViewHolderForItemId(manga.id!!) as? LatestUpdatesGridHolder
+        return latest_updates_grid.findViewHolderForItemId(manga.id!!) as? LatestUpdatesGridHolder
     }
 
     /**
