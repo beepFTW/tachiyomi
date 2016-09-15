@@ -83,8 +83,8 @@ class LatestUpdatesAdapter(val fragment: LatestUpdatesFragment) : FlexibleAdapte
             }
             return LatestUpdatesGridHolder(view, this, fragment)
         } else {
-            val view = parent.inflate(R.layout.item_latest_updates_grid) //was item_latest_updates_list
-            return LatestUpdatesGridHolder(view, this, fragment) //was LatestUpdatesListLatestHolder, for list cover images?
+            val view = parent.inflate(R.layout.item_latest_updates_list) //was item_latest_updates_list
+            return LatestUpdatesListHolder(view, this, fragment) //was LatestUpdatesListLatestHolder, for list cover images?
         }
     }
 

@@ -14,7 +14,7 @@ import kotlinx.android.synthetic.main.item_latest_updates_list.view.*
  * @param listener a listener to react to single tap and long tap events.
  * @constructor creates a new catalogue holder.
  */
-class LatestUpdatesListLatestHolder(private val view: View, adapter: LatestUpdatesAdapter, listener: OnListItemClickListener) :
+class LatestUpdatesListHolder(private val view: View, adapter: LatestUpdatesAdapter, listener: OnListItemClickListener) :
         LatestUpdatesHolder(view, adapter, listener) {
 
     private val favoriteColor = view.context.theme.getResourceColor(android.R.attr.textColorHint)
