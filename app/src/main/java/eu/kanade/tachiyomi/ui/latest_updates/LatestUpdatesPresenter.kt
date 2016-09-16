@@ -311,14 +311,17 @@ class LatestUpdatesPresenter : BasePresenter<LatestUpdatesFragment>() {
      * @return 2 if the source is valid, 1 if Login is Required and 0 otherwise.
      */
     fun isValidSource(source: OnlineSource?): Int {
-        if (source == null || !source.supportsLatest) return 0
+        if (source == null) return 0
 
-        if (source is LoginSource) {
-            if (source.isLogged() ||
-                    (prefs.sourceUsername(source) != "" && prefs.sourcePassword(source) != ""))
+        if (source.supportsLatest) {
+            if (source is LoginSource) {
+                if (source.isLogged() || (prefs.sourceUsername(source)
+                        != "" && prefs.sourcePassword(source) != ""))
+                    return 2 else return 1
+            }
             return 2
         }
-        return 2
+        return 0
     }
 
     /**

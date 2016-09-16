@@ -168,8 +168,11 @@ class LatestUpdatesFragment : BaseRxFragment<LatestUpdatesPresenter>(), Flexible
             val source = spinnerAdapter.getItem(position)
             if (presenter.isValidSource(source) != 2) {
                 spinner.setSelection(selectedIndex)
-                if (presenter.isValidSource(source) == 2) context.toast(R.string.source_requires_login)
-                else context.toast(R.string.source_unsupported_operation)
+                if (presenter.isValidSource(source) == 1) {
+                    context.toast(R.string.source_requires_login)
+                } else {
+                    context.toast(R.string.source_unsupported_operation)
+                }
             } else if (source != presenter.source) {
                 selectedIndex = position
                 showProgressBar()
