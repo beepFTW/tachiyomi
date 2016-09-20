@@ -102,10 +102,10 @@ abstract class OnlineSource(context: Context) : Source {
             }
 
     open fun fetchLatestUpdates(page: MangasPage): Observable<MangasPage> = client
-            .newCall(latestupdatesMangaRequest(page))
+            .newCall(latestupdatesRequest(page))
             .asObservable()
             .map { response ->
-                latestUpdatesMangaParse(response, page)
+                latestUpdatesParse(response, page)
                 page
             }
 
@@ -122,9 +122,9 @@ abstract class OnlineSource(context: Context) : Source {
         return GET(page.url, headers)
     }
 
-    open protected fun latestupdatesMangaRequest(page: MangasPage): Request {
+    open protected fun latestupdatesRequest(page: MangasPage): Request {
         if (page.page == 1) {
-            page.url = latestupdatesMangaInitialUrl()
+            page.url = latestupdatesInitialUrl()
         }
         return GET(page.url, headers)
     }
@@ -134,7 +134,7 @@ abstract class OnlineSource(context: Context) : Source {
      */
     abstract protected fun popularMangaInitialUrl(): String
 
-    abstract protected fun latestupdatesMangaInitialUrl(): String
+    abstract protected fun latestupdatesInitialUrl(): String
 
     /**
      * Parse the response from the site. It should add a list of manga and the absolute url to the
@@ -145,7 +145,7 @@ abstract class OnlineSource(context: Context) : Source {
      */
     abstract protected fun popularMangaParse(response: Response, page: MangasPage)
 
-    abstract protected fun latestUpdatesMangaParse(response: Response, page: MangasPage)
+    abstract protected fun latestUpdatesParse(response: Response, page: MangasPage)
 
     /**
      * Returns an observable containing a page with a list of manga. Normally it's not needed to

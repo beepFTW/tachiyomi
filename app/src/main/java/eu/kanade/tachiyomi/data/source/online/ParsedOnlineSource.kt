@@ -37,12 +37,12 @@ abstract class ParsedOnlineSource(context: Context) : OnlineSource(context) {
         }
     }
 
-    override fun latestUpdatesMangaParse(response: Response, page: MangasPage) {
+    override fun latestUpdatesParse(response: Response, page: MangasPage) {
         val document = response.asJsoup()
         for (element in document.select(popularMangaSelector())) {
             Manga.create(id).apply {
                 popularMangaFromElement(element, this)
-                page.mangas.add(this)
+                latestUpdatesAddMangaPage(page, this)
             }
         }
 
@@ -51,12 +51,14 @@ abstract class ParsedOnlineSource(context: Context) : OnlineSource(context) {
         }
     }
 
+    open fun latestUpdatesAddMangaPage(page: MangasPage, manga: Manga) {
+        page.mangas.add(manga)
+    }
+
     /**
      * Returns the Jsoup selector that returns a list of [Element] corresponding to each manga.
      */
     abstract protected fun popularMangaSelector(): String
-
-    abstract protected fun latestupdatesMangaSelector(): String
 
     /**
      * Fills [manga] with the given [element]. Most sites only show the title and the url, it's
@@ -67,15 +69,11 @@ abstract class ParsedOnlineSource(context: Context) : OnlineSource(context) {
      */
     abstract protected fun popularMangaFromElement(element: Element, manga: Manga)
 
-    abstract protected fun latestupdatesMangaFromElement(element: Element, manga: Manga)
-
     /**
      * Returns the Jsoup selector that returns the <a> tag linking to the next page, or null if
      * there's no next page.
      */
     abstract protected fun popularMangaNextPageSelector(): String?
-
-    abstract protected fun latestupdatesMangaNextPageSelector(): String?
 
     /**
      * Parse the response from the site and fills [page].

@@ -10,9 +10,11 @@ import eu.kanade.tachiyomi.data.source.model.MangasPage
 import eu.kanade.tachiyomi.data.source.model.Page
 import eu.kanade.tachiyomi.data.source.online.OnlineSource
 import eu.kanade.tachiyomi.data.source.online.ParsedOnlineSource
+import eu.kanade.tachiyomi.util.asJsoup
 import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.util.*
@@ -25,7 +27,7 @@ class Readmangatoday(context: Context, override val id: Int) : ParsedOnlineSourc
 
     override val lang: Language get() = EN
 
-    override val supportsLatest = false
+    override val supportsLatest = true
 
     override val client: OkHttpClient get() = network.cloudflareClient
 
@@ -39,7 +41,11 @@ class Readmangatoday(context: Context, override val id: Int) : ParsedOnlineSourc
 
     override fun popularMangaInitialUrl() = "$baseUrl/hot-manga/"
 
+    override fun latestupdatesInitialUrl() = "$baseUrl/latest-releases"
+
     override fun popularMangaSelector() = "div.hot-manga > div.style-list > div.box"
+
+    fun latestUpdatesSelector() = "div.content-list > div.style-list > div.manga_updates > dl"
 
     override fun popularMangaFromElement(element: Element, manga: Manga) {
         element.select("div.title > h2 > a").first().let {
@@ -48,7 +54,28 @@ class Readmangatoday(context: Context, override val id: Int) : ParsedOnlineSourc
         }
     }
 
-    override fun popularMangaNextPageSelector() = "div.hot-manga > ul.pagination > li > a:contains(»)"
+    override fun latestUpdatesParse(response: Response, page: MangasPage) {
+        val document = response.asJsoup()
+        for (element in document.select(latestUpdatesSelector())) {
+            Manga.create(id).apply {
+                latestUpdatesMangaFromElement(element, this)
+                latestUpdatesAddMangaPage(page, this)
+            }
+        }
+
+        popularMangaNextPageSelector().let { selector ->
+            page.nextPageUrl = document.select(selector).first()?.absUrl("href")
+        }
+    }
+
+    fun latestUpdatesMangaFromElement(element: Element, manga: Manga) {
+        element.select("dt a").let {
+            manga.setUrlWithoutDomain(it.attr("href"))
+            manga.title = it.text()
+        }
+    }
+
+    override fun popularMangaNextPageSelector() = "ul.pagination > li > a:contains(»)"
 
     override fun searchMangaInitialUrl(query: String, filters: List<Filter>) =
             "$baseUrl/service/advanced_search"
@@ -63,8 +90,8 @@ class Readmangatoday(context: Context, override val id: Int) : ParsedOnlineSourc
         builder.add("manga-name", query)
         builder.add("type", "all")
         builder.add("status", "both")
-        for (filter in filters) {
-            builder.add("include[]", filter.id)
+        for ((id1) in filters) {
+            builder.add("include[]", id1)
         }
 
         return POST(page.url, headers, builder.build())
@@ -129,7 +156,7 @@ class Readmangatoday(context: Context, override val id: Int) : ParsedOnlineSourc
                 date.add(Calendar.YEAR, -timeAgo)
             }
 
-            return date.getTimeInMillis()
+            return date.timeInMillis
         }
 
         return 0L
@@ -183,21 +210,4 @@ class Readmangatoday(context: Context, override val id: Int) : ParsedOnlineSourc
             Filter("36", "Yaoi"),
             Filter("37", "Yuri")
     )
-
-    override fun latestupdatesMangaInitialUrl(): String {
-        throw UnsupportedOperationException("not implemented")
-    }
-
-    override fun latestupdatesMangaNextPageSelector(): String {
-        throw UnsupportedOperationException("not implemented")
-    }
-
-    override fun latestupdatesMangaFromElement(element: Element, manga: Manga) {
-        throw UnsupportedOperationException("not implemented")
-    }
-
-    override fun latestupdatesMangaSelector(): String {
-        throw UnsupportedOperationException("not implemented")
-    }
-
 }

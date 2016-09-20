@@ -5,9 +5,11 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.source.EN
 import eu.kanade.tachiyomi.data.source.Language
+import eu.kanade.tachiyomi.data.source.model.MangasPage
 import eu.kanade.tachiyomi.data.source.model.Page
 import eu.kanade.tachiyomi.data.source.online.ParsedOnlineSource
 import eu.kanade.tachiyomi.util.asJsoup
+import okhttp3.Request
 import okhttp3.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
@@ -22,7 +24,7 @@ class Mangasee(context: Context, override val id: Int) : ParsedOnlineSource(cont
 
     override val lang: Language get() = EN
 
-    override val supportsLatest = false
+    override val supportsLatest = true
 
     private val datePattern = Pattern.compile("(\\d+)\\s+(.*?)s? (from now|ago).*")
 
@@ -43,12 +45,42 @@ class Mangasee(context: Context, override val id: Int) : ParsedOnlineSource(cont
 
     override fun popularMangaInitialUrl() = "$baseUrl/search_result.php?Action=Yes&order=popularity&numResultPerPage=20&sort=desc"
 
+    override fun latestupdatesInitialUrl() = "$baseUrl/latest.php?page=1"
+
     override fun popularMangaSelector() = "div.well > table > tbody > tr"
 
     override fun popularMangaFromElement(element: Element, manga: Manga) {
         element.select("td > h2 > a").first().let {
             manga.setUrlWithoutDomain("/${it.attr("href")}")
             manga.title = it.text()
+        }
+    }
+
+    override fun latestUpdatesParse(response: Response, page: MangasPage) {
+        val document = response.asJsoup()
+        val pageSel = "div.btn-group > a.btn:contains(Next)"
+        for (element in document.select(popularMangaSelector())) {
+            Manga.create(id).apply {
+                latestUpdatesMangaFromElement(client.newCall(Request.Builder().headers(headers)
+                        .url(baseUrl + element.select("td > a").attr("href").substring(2).substringBefore('&'))
+                        .build()).execute().asJsoup(), this)
+                latestUpdatesAddMangaPage(page, this)
+            }
+        }
+        pageSel.let { selector ->
+            page.nextPageUrl = document.select(selector).first()?.absUrl("href")
+        }
+    }
+
+    fun latestUpdatesMangaFromElement(element: Element, manga: Manga) {
+        manga.title = element.select("div.well > div.row > div.col-lg-9 >h1").text()
+        manga.setUrlWithoutDomain((element as Document).location())
+
+    }
+
+    override fun latestUpdatesAddMangaPage(page: MangasPage, manga: Manga) {
+        if (page.mangas.size == 0 || !page.mangas.last().url.equals(manga.url)) {
+            page.mangas.add(manga)
         }
     }
 
@@ -170,21 +202,4 @@ class Mangasee(context: Context, override val id: Int) : ParsedOnlineSource(cont
             Filter("Yaoi", "Yaoi"),
             Filter("Yuri", "Yuri")
     )
-
-    override fun latestupdatesMangaInitialUrl(): String {
-        throw UnsupportedOperationException("not implemented")
-    }
-
-    override fun latestupdatesMangaNextPageSelector(): String {
-        throw UnsupportedOperationException("not implemented")
-    }
-
-    override fun latestupdatesMangaFromElement(element: Element, manga: Manga) {
-        throw UnsupportedOperationException("not implemented")
-    }
-
-    override fun latestupdatesMangaSelector(): String {
-        throw UnsupportedOperationException("not implemented")
-    }
-
 }
