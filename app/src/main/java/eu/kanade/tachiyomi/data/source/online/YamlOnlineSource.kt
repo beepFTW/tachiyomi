@@ -34,7 +34,7 @@ class YamlOnlineSource(context: Context, mappings: Map<*, *>) : OnlineSource(con
         getLanguages().find { code == it.code }!!
     }
 
-    override val supportsLatest = map.supportsLatest.toBoolean()
+    override fun supportsLatest() = map.supportsLatest.toBoolean()
 
     override val client = when(map.client) {
         "cloudflare" -> network.cloudflareClient

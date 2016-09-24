@@ -27,7 +27,7 @@ class Readmangatoday(context: Context, override val id: Int) : ParsedOnlineSourc
 
     override val lang: Language get() = EN
 
-    override val supportsLatest = true
+    override fun supportsLatest() = true
 
     override val client: OkHttpClient get() = network.cloudflareClient
 

@@ -75,7 +75,7 @@ class RecentChaptersFragment
         recycler.adapter = adapter
 
         // Update toolbar text
-        setToolbarTitle(R.string.label_recent_updates)
+        setToolbarTitle(R.string.label_library_updates)
     }
 
     /**

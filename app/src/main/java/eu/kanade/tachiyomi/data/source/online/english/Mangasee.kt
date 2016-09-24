@@ -24,7 +24,7 @@ class Mangasee(context: Context, override val id: Int) : ParsedOnlineSource(cont
 
     override val lang: Language get() = EN
 
-    override val supportsLatest = true
+    override fun supportsLatest() = true
 
     private val datePattern = Pattern.compile("(\\d+)\\s+(.*?)s? (from now|ago).*")
 

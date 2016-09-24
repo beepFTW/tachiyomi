@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.ui.catalogue.Pager
 import eu.kanade.tachiyomi.data.source.online.OnlineSource.Filter
 
 /**
- * Presenter of [*Fragment]. Inherit CataloguePresenter.
+ * Presenter of [LatestUpdatesFragment]. Inherit CataloguePresenter.
  */
 class LatestUpdatesPresenter : CataloguePresenter() {
 
@@ -16,11 +16,11 @@ class LatestUpdatesPresenter : CataloguePresenter() {
     }
 
     override fun getEnabledSources(): List<OnlineSource> {
-        return super.getEnabledSources().filter { it.supportsLatest }
+        return super.getEnabledSources().filter { it.supportsLatest() }
     }
 
     override fun isValidSource(source: Source?): Boolean {
-        return super.isValidSource(source) && (source as OnlineSource).supportsLatest
+        return super.isValidSource(source) && (source as OnlineSource).supportsLatest()
     }
 
 }

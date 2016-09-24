@@ -37,6 +37,9 @@ abstract class ParsedOnlineSource(context: Context) : OnlineSource(context) {
         }
     }
 
+    /**
+     * @InheritDoc
+     */
     override fun latestUpdatesParse(response: Response, page: MangasPage) {
         val document = response.asJsoup()
         for (element in document.select(popularMangaSelector())) {
@@ -51,6 +54,10 @@ abstract class ParsedOnlineSource(context: Context) : OnlineSource(context) {
         }
     }
 
+    /**
+     * allows small modification of latestUpdatesParse
+     * without override {@see Mangasee#latestUpdatesAddMangaPage}
+     */
     open fun latestUpdatesAddMangaPage(page: MangasPage, manga: Manga) {
         page.mangas.add(manga)
     }

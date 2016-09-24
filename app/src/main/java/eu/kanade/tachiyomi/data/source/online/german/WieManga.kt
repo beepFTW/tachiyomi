@@ -19,9 +19,9 @@ class WieManga(context: Context, override val id: Int) : ParsedOnlineSource(cont
 
     override val baseUrl = "http://www.wiemanga.com"
 
-    override val lang: Language = DE
+    override val lang: Language get()= DE
 
-    override val supportsLatest = true
+    override fun supportsLatest() = true
 
     override fun popularMangaInitialUrl() = "$baseUrl/list/Hot-Book/"
 

@@ -27,7 +27,7 @@ class Kissmanga(context: Context, override val id: Int) : ParsedOnlineSource(con
 
     override val lang: Language get() = EN
 
-    override val supportsLatest = true
+    override fun supportsLatest() = true
 
     override val client: OkHttpClient = network.cloudflareClient
 

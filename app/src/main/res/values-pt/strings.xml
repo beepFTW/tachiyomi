@@ -9,8 +9,8 @@
     <string name="label_download_queue">Fila de Transferências</string>
     <string name="label_library">A minha biblioteca</string>
     <string name="label_recent_manga">Lidos recentemente</string>
-    <string name="label_recent_updates">Atualizações</string>
-    <string name="label_catalogues">Catálogos</string>
+    <string name="label_library_updates">Atualizações</string>
+    <string name="label_browse_catalogues">Catálogos</string>
     <string name="label_categories">Categorias</string>
     <string name="label_selected">Selecionado: %1$d</string>
     <string name="label_backup">Cópia de segurança</string>

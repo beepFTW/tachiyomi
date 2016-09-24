@@ -22,7 +22,7 @@ class Mintmanga(context: Context, override val id: Int) : ParsedOnlineSource(con
 
     override val lang: Language get() = RU
 
-    override val supportsLatest = true
+    override fun supportsLatest() = true
 
     override fun popularMangaInitialUrl() = "$baseUrl/list?sortType=rate"
 

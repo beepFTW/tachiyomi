@@ -23,7 +23,7 @@ class Mangafox(context: Context, override val id: Int) : ParsedOnlineSource(cont
 
     override val lang: Language get() = EN
 
-    override val supportsLatest = true
+    override fun supportsLatest() = true
 
     override fun popularMangaInitialUrl() = "$baseUrl/directory/"
 

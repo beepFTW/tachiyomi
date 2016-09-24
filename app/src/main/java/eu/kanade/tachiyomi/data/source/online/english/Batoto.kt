@@ -36,7 +36,7 @@ class Batoto(context: Context, override val id: Int) : ParsedOnlineSource(contex
 
     override val lang: Language get() = EN
 
-    override val supportsLatest = true
+    override fun supportsLatest() = true
 
     private val datePattern = Pattern.compile("(\\d+|A|An)\\s+(.*?)s? ago.*")
 

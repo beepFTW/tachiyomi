@@ -54,11 +54,6 @@ abstract class OnlineSource(context: Context) : Source {
     abstract val lang: Language
 
     /**
-     * If the Source has Support for Latest Updates
-     */
-    abstract val supportsLatest : Boolean
-
-    /**
      * Headers used for requests.
      */
     val headers by lazy { headersBuilder().build() }
@@ -67,6 +62,11 @@ abstract class OnlineSource(context: Context) : Source {
      * Genre filters.
      */
     val filters by lazy { getFilterList() }
+
+    /**
+     * If the Source has Support for Latest Updates
+     */
+    abstract fun supportsLatest() : Boolean
 
     /**
      * Default network client for doing requests.
@@ -134,6 +134,9 @@ abstract class OnlineSource(context: Context) : Source {
      */
     abstract protected fun popularMangaInitialUrl(): String
 
+    /**
+     * Returns the absolute url of the first page to latest manga.
+     */
     abstract protected fun latestupdatesInitialUrl(): String
 
     /**
@@ -145,6 +148,9 @@ abstract class OnlineSource(context: Context) : Source {
      */
     abstract protected fun popularMangaParse(response: Response, page: MangasPage)
 
+    /**
+     * Same as {@link #popularMangaParse(response: Response, page: MangasPage)} but for latest manga
+     */
     abstract protected fun latestUpdatesParse(response: Response, page: MangasPage)
 
     /**
@@ -178,7 +184,7 @@ abstract class OnlineSource(context: Context) : Source {
     }
 
     /**
-     * Returns the absolute url of the first page to popular manga.
+     * Returns the absolute url of the first page of queries.
      *
      * @param query the search query.
      */
